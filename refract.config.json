@@ -1,0 +1,7 @@
+{
+  "sourceDir": "source",
+  "outDir": "dist",
+  "targets": {
+    "skills": "~/.claude/skills"
+  }
+}

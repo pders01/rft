@@ -7,8 +7,7 @@ dist/
 package-lock.json
 yarn.lock
 
-# local config carries machine-specific targets; copy from the example
-refract.config.json
+# the real config and source/ are tracked in this repo
 
 # sandbox install destination used by the example config
 examples/
