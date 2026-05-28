@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# pnpm is the package manager; reject other lockfiles
+package-lock.json
+yarn.lock
+
+# local config carries machine-specific targets; copy from the example
+refract.config.json
+
+# sandbox install destination used by the example config
+examples/

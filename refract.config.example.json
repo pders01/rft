@@ -1,0 +1,9 @@
+{
+  "sourceDir": "source",
+  "outDir": "dist",
+  "targets": {
+    "skills": "./examples/skills",
+    "mcp": "./examples/mcp-tools",
+    "docs": "./examples/docs"
+  }
+}

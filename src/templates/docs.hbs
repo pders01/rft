@@ -1,0 +1,16 @@
+---
+title: {{{yaml title}}}
+slug: {{id}}
+kind: {{kind}}
+intent: {{{yaml intent}}}
+{{#if domains~}}
+domains: {{{yamlList domains}}}
+{{/if~}}
+{{#if related~}}
+related: {{{yamlList related}}}
+{{/if~}}
+---
+
+# {{title}}
+
+{{{content}}}
