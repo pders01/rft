@@ -1,0 +1,23 @@
+{
+  "name": "helium-cdp",
+  "version": "0.1.0",
+  "description": "Drive a local Helium/Chromium over raw Chrome DevTools Protocol — zero dependencies.",
+  "type": "module",
+  "bin": {
+    "helium-cdp": "bin/helium-cdp.mjs"
+  },
+  "exports": {
+    ".": "./src/cdp.mjs",
+    "./page": "./src/page.mjs",
+    "./helium": "./src/helium.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "license": "MIT"
+}
