@@ -72,6 +72,7 @@ body is the content.
 | `triggers` | string[] | no       | When this should activate                     |
 | `domains`  | string[] | no       | Faceting / filtering                          |
 | `related`  | string[] | no       | Cross-links between entries                   |
+| `invocation` | enum   | no       | `automatic` (default) or explicit user invocation only |
 
 ## Adapters
 

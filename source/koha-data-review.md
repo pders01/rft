@@ -2,6 +2,7 @@
 id: koha-data-review
 title: Review Koha database, system preference, and object changes
 kind: skill
+invocation: explicit
 intent: Review Koha schema migrations, atomic updates, system preferences, DBIC mappings, Koha objects, and their tests as one coherent data change.
 triggers:
   - "review a Koha database update"

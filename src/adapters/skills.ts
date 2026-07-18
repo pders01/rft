@@ -26,6 +26,7 @@ export const skillAdapter: Adapter = {
       id: entry.id,
       title: entry.title,
       description,
+      explicitInvocation: entry.invocation === "explicit",
       content: entry.content,
     });
 

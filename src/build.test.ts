@@ -142,6 +142,7 @@ test("docs frontmatter renders optional list fields when present", () => {
       "intent: Has facets.",
       "domains: [code, retrieval]",
       "related: [read-file]",
+      "invocation: explicit",
     ].join("\n"),
     "Body.",
   );
@@ -151,4 +152,5 @@ test("docs frontmatter renders optional list fields when present", () => {
 
   assert.match(doc, /^domains: \["code", "retrieval"\]$/m);
   assert.match(doc, /^related: \["read-file"\]$/m);
+  assert.match(doc, /^invocation: explicit$/m);
 });

@@ -2,6 +2,7 @@
 id: koha-ui-review
 title: Review a Koha interface patch
 kind: skill
+invocation: explicit
 intent: Review Koha staff and OPAC interface changes for established interaction patterns, translation, accessibility, security, templates, and current main-tree integration.
 triggers:
   - "review a Koha UI patch"

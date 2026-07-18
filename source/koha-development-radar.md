@@ -2,6 +2,7 @@
 id: koha-development-radar
 title: Build a Koha development radar from Git history
 kind: skill
+invocation: explicit
 intent: Produce a concise, evidence-based briefing of what recently landed in Koha by examining Git history at day, week, month, and release-cycle zoom levels.
 triggers:
   - "what changed recently in Koha"

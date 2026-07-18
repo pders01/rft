@@ -14,6 +14,7 @@ export const docsAdapter: Adapter = {
       intent: entry.intent,
       domains: entry.domains,
       related: entry.related,
+      invocation: entry.invocation,
       content: entry.content,
     });
 

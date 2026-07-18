@@ -47,6 +47,22 @@ test("skill adapter omits Triggers clause when none given", () => {
   assert.doesNotMatch(skill, /Triggers:/);
 });
 
+test("skill adapter maps explicit invocation to hidden skill frontmatter", () => {
+  skillAdapter.emit(entry({ invocation: "explicit" }), outDir);
+  const explicit = readFileSync(
+    path.join(outDir, "skills", "x", "SKILL.md"),
+    "utf8",
+  );
+  assert.match(explicit, /^disable-model-invocation: true$/m);
+
+  skillAdapter.emit(entry({ invocation: "automatic" }), outDir);
+  const automatic = readFileSync(
+    path.join(outDir, "skills", "x", "SKILL.md"),
+    "utf8",
+  );
+  assert.doesNotMatch(automatic, /disable-model-invocation/);
+});
+
 test("skill adapter errors when description exceeds 1024 chars", () => {
   const longIntent = "x".repeat(1100);
   assert.throws(

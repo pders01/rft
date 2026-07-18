@@ -2,6 +2,7 @@
 id: koha-skill-maintenance
 title: Maintain the Koha community skills
 kind: skill
+invocation: explicit
 intent: Add, refresh, and reorganize the Koha development skills without losing authority, provenance, temporal warnings, task-oriented boundaries, or consistency across overlapping reviews.
 triggers:
   - "update the Koha skills"
@@ -9,7 +10,7 @@ triggers:
   - "refresh the Koha guideline snapshot"
   - "review the Koha skills for consistency"
 domains: [koha, skills, maintenance, knowledge-management]
-related: [koha-code-review, koha-api-review, koha-data-review, koha-ui-review, koha-contribution-workflow, koha-development-radar, koha-plugin-development, koha-debian-package-build, koha-debian-packaging-review]
+related: [koha-community, koha-code-review, koha-api-review, koha-data-review, koha-ui-review, koha-contribution-workflow, koha-development-radar, koha-plugin-development, koha-debian-package-build, koha-debian-packaging-review]
 ---
 
 Use this skill when changing the Koha development/review skill set itself. Its job is
@@ -17,7 +18,7 @@ to preserve a coherent, auditable projection of supplied community knowledge—n
 turn every source page into a skill or silently elevate historical examples into
 policy.
 
-> **Maintenance snapshot:** Refreshed `2026-07-18T10:32:30Z` while curating the
+> **Maintenance snapshot:** Refreshed `2026-07-18T10:46:43Z` while curating the
 > supplied Koha development guidance.
 >
 > **Main-tree cross-check:** Integration points were checked against Koha main at
@@ -59,6 +60,9 @@ checklist from obscuring relevant instructions.
 
 The maintained review architecture is:
 
+- `koha-community` — the sole automatically advertised global router; recognizes
+  Koha work independent of checkout location and loads hidden specialists by relative
+  reference.
 - `koha-code-review` — orchestrator and common coding, contribution, testing, and QA
   review.
 - `koha-api-review` — REST contract, specification, controller, authorization, and
@@ -79,6 +83,12 @@ The maintained review architecture is:
   services, administrative commands, and generated projections.
 - `koha-skill-maintenance` — authority, refresh, consistency, and build process for
   this set.
+
+Set specialist entries to `invocation: explicit`; only `koha-community` should use
+automatic invocation. This maps to Agent Skills' `disable-model-invocation` metadata,
+so specialists remain available as slash commands without adding all descriptions to
+every system prompt. The router must link to each sibling `SKILL.md` by a relative
+path and load the smallest relevant set.
 
 Prefer conditional routing from the general review skill over duplicating every
 specialized checklist in it. Some overlap is intentional for high-risk invariants
@@ -151,7 +161,8 @@ Never claim freshness based only on touching wording or rebuilding output.
 
 On every material refresh, verify:
 
-- all routing references point to existing skill IDs;
+- all routing references point to existing skill IDs and relative skill files;
+- exactly one Koha skill (`koha-community`) permits automatic model invocation;
 - authority language agrees across skills;
 - stale thresholds and “continue only with acceptance” behavior agree;
 - the general skill does not mislabel specialized additive patterns as adopted rules;

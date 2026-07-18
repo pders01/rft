@@ -2,6 +2,7 @@
 id: koha-plugin-development
 title: Develop and review Koha plugins
 kind: skill
+invocation: explicit
 intent: Design, implement, package, and review Koha plugins and core plugin hooks against current contracts, security boundaries, API/UI guidelines, lifecycle behavior, and focused tests.
 triggers:
   - "develop a Koha plugin"

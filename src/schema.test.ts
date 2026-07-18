@@ -43,6 +43,19 @@ test("buildEntry rejects an unknown kind enum value", () => {
   );
 });
 
+test("buildEntry accepts only known invocation modes", () => {
+  const explicit = buildEntry(
+    { ...valid, invocation: "explicit" },
+    "x",
+    "f.md",
+  );
+  assert.equal(explicit.invocation, "explicit");
+  assert.throws(
+    () => buildEntry({ ...valid, invocation: "sometimes" }, "x", "f.md"),
+    /invocation/,
+  );
+});
+
 test("buildEntry rejects unknown frontmatter keys (strict schema)", () => {
   assert.throws(
     () => buildEntry({ ...valid, surprise: true }, "x", "f.md"),
@@ -60,4 +73,5 @@ test("buildEntry allows optional fields to be absent", () => {
   const entry = buildEntry(minimal, "body", "m.md");
   assert.equal(entry.triggers, undefined);
   assert.equal(entry.domains, undefined);
+  assert.equal(entry.invocation, undefined);
 });

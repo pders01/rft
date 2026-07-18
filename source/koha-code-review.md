@@ -2,6 +2,7 @@
 id: koha-code-review
 title: Review a Koha patch against the coding guidelines
 kind: skill
+invocation: explicit
 intent: Review a Koha patch for guideline regressions across Perl, templates, JavaScript, SQL, security, tests, accessibility, and contribution hygiene.
 triggers:
   - "review this Koha patch"

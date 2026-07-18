@@ -17,6 +17,7 @@ export const FrontmatterSchema = z
     triggers: z.array(z.string().min(1)).optional(),
     domains: z.array(z.string().min(1)).optional(),
     related: z.array(slug).optional(),
+    invocation: z.enum(["automatic", "explicit"]).optional(),
   })
   .strict();
 

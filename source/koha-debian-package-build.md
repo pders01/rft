@@ -2,6 +2,7 @@
 id: koha-debian-package-build
 title: Build and validate Koha Debian packages
 kind: skill
+invocation: explicit
 intent: Turn a committed Koha revision into traceable Debian packages using the current supported builder, then inspect and test the artifacts without confusing historical packaging recipes for present practice.
 triggers:
   - "build Koha Debian packages"

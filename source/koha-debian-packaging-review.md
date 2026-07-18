@@ -2,6 +2,7 @@
 id: koha-debian-packaging-review
 title: Review Koha Debian packaging changes
 kind: skill
+invocation: explicit
 intent: Review changes to Koha Debian metadata, dependencies, maintainer scripts, service integration, instance commands, documentation, and upgrade behavior before building packages.
 triggers:
   - "review Koha Debian packaging changes"

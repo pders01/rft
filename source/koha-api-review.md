@@ -2,6 +2,7 @@
 id: koha-api-review
 title: Review a Koha REST API patch
 kind: skill
+invocation: explicit
 intent: Review Koha REST API specifications, routes, controllers, responses, and tests against the community API guidelines.
 triggers:
   - "review this Koha API patch"

@@ -102,6 +102,7 @@ everything downstream projects from it. A reasonable starting schema:
 | `triggers` | string[]   | no       | When this should activate; used by skill description |
 | `domains`  | string[]   | no       | Faceting / filtering                                 |
 | `related`  | string[]   | no       | Cross-links between entries                          |
+| `invocation` | enum     | no       | `automatic` (default) or explicit user invocation only |
 
 Keep the schema small and additive. Adding a field is cheap; adapters ignore fields
 they don't consume.

@@ -2,6 +2,7 @@
 id: koha-contribution-workflow
 title: Navigate the Koha contribution workflow
 kind: skill
+invocation: explicit
 intent: Prepare reproducible bug reports and move Koha patches through authoring, sign-off, QA, release, backport, documentation, and closure without conflating roles or changing community state without consent.
 triggers:
   - "prepare a Koha bug report"
