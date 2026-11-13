@@ -13,14 +13,24 @@ domains: [koha, plugins, hooks, api, extension-development, code-review]
 related: [koha-code-review, koha-api-review, koha-ui-review, koha-data-review, koha-skill-maintenance]
 ---
 
-> **Plugin snapshot:** Refreshed `2026-07-18T10:23:10Z` from supplied Koha plugin
-> and hook guidance. At the start of every plugin task, compare this timestamp with
+> **Plugin snapshot:** Refreshed `2026-11-13T18:47:32Z` from Koha wiki plugin,
+> development-reference, and hook guidance. At the start of every plugin task, compare this timestamp with
 > the current date. If it is more than 90 days old, warn that hooks and plugin
 > infrastructure may have changed, ask for refreshed material, and continue with the
 > stale snapshot only if the user accepts that limitation.
 >
 > **Main-tree cross-check:** Plugin integration points were checked against Koha main
 > at commit `1265f905234946d67f7112932f9b274c47faf152` (2026-07-17).
+>
+> **General guideline snapshot:** Reviewed `2026-11-13T18:54:37Z` from a
+> user-supplied Koha wiki export identifying revision `40849` (last edited
+> 2026-10-14). No current Koha checkout was provided, so the main-tree cross-check
+> was not renewed.
+
+Check the general-guideline baseline and main-tree date independently of this wiki
+refresh. If either relevant baseline is more than 90 days old, warn, ask for refreshed
+material or a current checkout, and continue on that baseline only with the user's
+explicit acceptance. A recent supplemental refresh does not make those records current.
 
 The Koha coding guidelines are authoritative for core changes and the baseline for
 plugin quality. Supplemental plugin pages and main are additive. Hook tables age
@@ -112,8 +122,8 @@ tests proving the contract:
 ```
 
 - Inspect `Koha::Plugins->call`, `GetPlugins`, and the concrete call site. The generic
-  dispatcher catches plugin exceptions and continues in current main, but individual
-  direct-dispatch paths may differ.
+  dispatcher caught plugin exceptions and continued at the historical main
+  cross-check; individual direct-dispatch paths and target versions may differ.
 - Match exact argument ownership. The coding guideline requires references when
   adding a core hook so each plugin receives data modified by preceding plugins.
   Document mutation ordering and test multiple plugins, not only one.
@@ -123,7 +133,12 @@ tests proving the contract:
   After-hooks must handle committed/deleted object state documented by the call site.
 - Hooks on circulation, cataloging, authentication, payments, notices, or account
   actions are high-risk. Test permissions, privacy, failure, duplicate invocation,
-  and transaction boundaries.
+  and transaction boundaries. The wiki describes `check_password` as a password
+  creation/update strength check, not login authentication; verify that distinction
+  in the target call sites and never log or retain the plaintext argument.
+- Separate a documented hook's status from its availability. The refreshed table
+  still has an explicit “under development” section; a recent page edit or a linked
+  bug is not evidence that any listed hook landed in the supported release.
 - Keep synchronous hooks fast. The supplied guidance recommends asynchronous work
   for expensive after-action integrations; enqueue a minimal durable job rather than
   block circulation or record saves on a remote service.
@@ -165,7 +180,11 @@ Apply `koha-ui-review` to plugin output.
 - Global OPAC/staff head or JavaScript hooks affect every page: avoid them when a
   scoped hook works, use CSP-compatible assets, and prevent duplicate initialization.
 - Do not weaken CSP with unsafe inline code. Keep translation, accessibility,
-  responsive behavior, and current Bootstrap/Koha components consistent.
+  responsive behavior, and current Bootstrap/Koha components consistent. Match stable
+  selectors rather than translated visible strings (`JS20`). JS21's core migration
+  to vanilla JavaScript/Vue explicitly retains jQuery support for plugins and
+  *UserJS; do not misreport plugin jQuery alone as a core-rule violation. Changes to
+  Koha core made for a plugin still follow JS21.
 - Tool/report/configure pages enforce permissions server-side, include CSRF for state
   changes, use `cud-` operations where core form conventions apply, and do not rely
   on a hidden menu entry for access control.
@@ -197,8 +216,11 @@ definition. Verify current accepted shape in core and its tests.
 
 ## Build and inspect the kpz
 
-Use the plugin project's supplied build/release configuration; no canonical build CLI
-was included in the snapshot, so do not invent one.
+Use the plugin project's supplied build/release configuration. The development
+reference demonstrates a `.kpz` as a ZIP containing the `Koha/Plugin/...` tree; that
+minimal example is not a canonical release CLI or proof that every plugin needs
+only those files. Do not invent build commands or copy its old inline-JS example
+without the target version's CSP and security checks.
 
 - Build from a clean committed revision and record source hash, toolchain, command,
   and plugin version.

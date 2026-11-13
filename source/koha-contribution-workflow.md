@@ -13,8 +13,8 @@ domains: [koha, workflow, bugzilla, signoff, qa, release]
 related: [koha-code-review, koha-development-radar, koha-skill-maintenance]
 ---
 
-> **Workflow snapshot:** Refreshed `2026-07-18T10:23:10Z` from supplied Koha bug
-> reporting, commit, sign-off, QA, and development-workflow guidance. At the start of
+> **Workflow snapshot:** Refreshed `2026-11-13T18:47:32Z` from Koha wiki bug
+> reporting, commit, submission, sign-off, QA, development, and release guidance. At the start of
 > every workflow task, compare this timestamp with the current date. If it is more
 > than 90 days old, warn that tracker fields or community practice may have changed,
 > ask for refreshed material, and continue only if the user accepts that limitation.
@@ -22,6 +22,16 @@ related: [koha-code-review, koha-development-radar, koha-skill-maintenance]
 > **Main-tree cross-check:** Commit and test integration points were checked against
 > Koha main at commit `1265f905234946d67f7112932f9b274c47faf152`
 > (2026-07-17). Tracker state cannot be inferred from a Git checkout.
+>
+> **General guideline snapshot:** Reviewed `2026-11-13T18:54:37Z` from a
+> user-supplied Koha wiki export identifying revision `40849` (last edited
+> 2026-10-14). No current Koha checkout was provided, so the main-tree cross-check
+> was not renewed.
+
+Check the general-guideline baseline and main-tree date independently of this wiki
+refresh. If either relevant baseline is more than 90 days old, warn, ask for refreshed
+material or a current checkout, and continue on that baseline only with the user's
+explicit acceptance. A recent supplemental refresh does not make those records current.
 
 The coding guidelines are authoritative for code and commits. Workflow documents are
 additive community process. Do not fetch or alter community infrastructure unless the
@@ -63,6 +73,8 @@ Draft:
 
 - **Summary:** concise, searchable description of the problem—not the proposed fix.
 - **Component/version/platform/OS:** exact environment and other versions tested.
+  When verified on multiple affected versions, the reporting guidance selects the
+  newest and lists the others in the description. Do not guess untested versions.
 - **Severity:** impact-based. Reserve blocker/critical for release-blocking, crash,
   data-loss, or similarly severe outcomes; distinguish bugs, enhancements, and truly
   new features. A cosmetically small issue requiring broad workflow/schema change may
@@ -93,13 +105,31 @@ implementation.
 - Call out documentation, preference, permission, cron, schema, configuration,
   package, and upgrade consequences.
 - Run focused tests, QA Test Tools, and domain review skills over the exact series.
+- For a new Perl dependency, explain why it is needed and how it was selected,
+  update `cpanfile`, and coordinate with the Packaging Manager/team early. The release
+  guidance calls for the `dependency` keyword, packaging CC, and packaging sign-off
+  before progression. Propose those tracker changes; do not perform them without
+  authorization. Apply `koha-debian-packaging-review` to dependency changes.
 - Material AI assistance receives the required trailer and is communicated during
   testing/review as required by the coding guidelines.
 - Attach/upload behavior is a user-authorized workflow step. Prefer locally available
   current tooling and inspect its help rather than copying old transport commands.
 
+Before submission, check the process metadata as well as the attachment:
+
+- If the author will implement the fix, the submission guidance calls for assigning
+  the report to that author and setting **ASSIGNED**.
+- Sponsored work records the tracker sponsorship field as well as the commit's
+  `Sponsored-by:` trailer.
+- Select **Patch complexity** by scope and side-effect risk: **String** for strings or
+  documentation/POD only; **Trivial** for minimal changes; **Small** for a few Perl
+  changes; **Medium** for broader low/medium-risk changes and no/small DB changes;
+  **Large** for broad high-risk changes or large DB changes. Do not equate complexity
+  with severity or line count alone.
+
 When ready for independent testing, the patch writer supplies the patch and moves the
-report to **Needs Signoff**. Do neither automatically.
+report to **Needs Signoff**. Assignment, fields, uploads, and status transitions all
+require authorization; do none automatically.
 
 ## Independent sign-off
 
@@ -161,6 +191,35 @@ When a pushed change is incomplete:
 Do not report defects in already-pushed new functionality as endless revisions of the
 original implementation bug. Documentation completion and actual release determine
 later closure states.
+
+### Release and backport checks
+
+Treat release documentation as additive operational guidance. The release-management
+page is explicitly work in progress and leaves final decisions to the elected RM;
+it is not a fixed command recipe or an authorization to publish.
+
+- Assess the branch directly ahead of the target, not only main. Preserve the
+  maintainer's consideration cursor, deferred string changes, and blocked rebases
+  during handover.
+- Prioritize security, critical, and blocker fixes. Stable/oldstable generally consider
+  other fixes and only minor, non-breaking enhancements case by case; they do not
+  take new features. Older branches are more conservative. Inspect dependency and
+  schema risks separately rather than promising a backport because main accepted it.
+- The maintenance guidance describes string freeze on the 15th and release on the
+  22nd. Other installation guidance says releases occur around the 20th. Treat these
+  as planning context, confirm the actual team's schedule, and do not infer deadlines
+  or publication from the calendar.
+- Rebuild affected generated schema/CSS and run relevant tests on the target branch.
+  Upgrade/fresh-install comparison can drop databases: use only an explicitly
+  authorized disposable environment. Never copy a reset-and-rewrite example into
+  an ordinary review session.
+- For a coordinated security release, keep embargoed patches and draft notes private.
+  The guidance warns that public Jenkins does not test security branches; obtain
+  local full-suite evidence rather than treating absent CI as success. Coordinate
+  packaging and public disclosure with the responsible release roles.
+- Record release versions and DB revision numbering consistently after an unscheduled
+  release. Check release-note ranges for duplicate security entries; a Git tag or
+  push alone does not establish that packages or announcements are available.
 
 ## Produce a workflow report
 
