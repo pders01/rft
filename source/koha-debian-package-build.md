@@ -13,14 +13,24 @@ domains: [koha, debian, packaging, build, deployment]
 related: [koha-debian-packaging-review, koha-code-review, koha-data-review, koha-skill-maintenance]
 ---
 
-> **Packaging snapshot:** Refreshed `2026-07-18T10:23:10Z` from supplied Koha
-> Debian build, installation, and package-command guidance. At the start of every
+> **Packaging snapshot:** Refreshed `2026-11-13T18:47:32Z` from Koha wiki Debian
+> build, dependency, installation, package-command, and script guidance. At the start of every
 > build, compare this timestamp with the current date. If it is more than 90 days
 > old, warn that package infrastructure may have changed, ask for refreshed material,
 > and continue with the stale snapshot only if the user accepts that limitation.
 >
 > **Main-tree cross-check:** Packaging integration points were checked against Koha
 > main at commit `1265f905234946d67f7112932f9b274c47faf152` (2026-07-17).
+>
+> **General guideline snapshot:** Reviewed `2026-11-13T18:54:37Z` from a
+> user-supplied Koha wiki export identifying revision `40849` (last edited
+> 2026-10-14). No current Koha checkout was provided, so the main-tree cross-check
+> was not renewed.
+
+Check the general-guideline baseline and main-tree date independently of this wiki
+refresh. If either relevant baseline is more than 90 days old, warn, ask for refreshed
+material or a current checkout, and continue on that baseline only with the user's
+explicit acceptance. A recent supplemental refresh does not make those records current.
 
 The Koha coding guidelines remain authoritative for packaged source. Supplied
 packaging pages and current main are additive operational evidence. The supplied
@@ -69,9 +79,10 @@ CLI.
 
 ### Legacy fallback: main-tree snapshot builder
 
-Current main still contains `debian/build-git-snapshot`, and its own help describes
-it as useful for local packages but unsuitable for upstreamable releases. Use it only
-when the user deliberately chooses the legacy pbuilder path.
+The historical main cross-check found `debian/build-git-snapshot`; its help described
+it as useful for local packages but unsuitable for upstreamable releases. Confirm it
+still exists in the target revision and use it only when the user deliberately
+chooses the legacy pbuilder path.
 
 At the recorded main revision it:
 
@@ -85,7 +96,7 @@ At the recorded main revision it:
   Debian revision (default `-1`).
 
 Read `debian/build-git-snapshot --help` in the target revision before constructing
-the command. Main's short options currently include `-r` for build results, `-D` for
+the command. At the historical cross-check, its short options included `-r` for build results, `-D` for
 distribution, `-b` for a pbuilder base tarball, `-v` for version, `-i` for Debian
 revision, and `-d` for debug. Do not rely on a historical copied command when help
 differs.
@@ -99,9 +110,9 @@ differs.
   tree changes into a build; they will not be archived.
 - Review commits with the relevant Koha review skills and run focused tests and QA
   tools before spending time on packaging.
-- Determine whether custom atomic updates are intentional. Current main's atomic
-  update test skips its “no pending contributor updates” assertion when
-  `CUSTOM_PACKAGE` is set. `CUSTOM_PACKAGE=1` is a narrowly scoped declaration for a
+- Determine whether custom atomic updates are intentional. At the historical main
+  cross-check, the atomic update test skipped its “no pending contributor updates”
+  assertion when `CUSTOM_PACKAGE` was set; confirm this in the target revision. `CUSTOM_PACKAGE=1` is a narrowly scoped declaration for a
   custom package containing those updates—not a generic build-fix switch.
 - Keep translation inputs explicit. Historical guidance says translations are a
   separate package/input; verify how the selected modern builder obtains them.
@@ -172,7 +183,10 @@ Use an expendable VM/container that resembles the supported target OS. Package
 installation scripts manage users, databases, services, Apache configuration, and
 instance directories; never trial them on production.
 
-1. Snapshot/backup the test instance and record installed/candidate versions.
+1. Snapshot/backup the test instance and record installed/candidate versions. Check
+   what the installed backup command includes: wiki guidance says `koha-dump` omits
+   uploaded and temporary-uploaded files unless requested. Verify a restore of all
+   relevant data, not only a successful SQL dump.
 2. Prefer a local APT repository or an APT-supported local package install so
    dependencies are solved as one transaction. Historical `dpkg -i` followed by
    `apt-get -f install` is recovery-oriented, not proof of a clean dependency plan.
@@ -189,8 +203,17 @@ instance directories; never trial them on production.
    check what happens to instance data and configuration.
 
 The package guidance recommends release-number APT suites over moving code names to
-avoid an unintended major upgrade. Before any real upgrade, inspect `apt-cache
-policy`, back up, test elsewhere, and read the complete APT transaction.
+avoid an unintended major upgrade. Its refreshed installation examples use deb822
+`.sources` stanzas with a scoped `Signed-By` keyring; when migrating old `.list`
+configuration, check for duplicate sources. Confirm candidate versions with
+`apt-cache policy` rather than copying the page's inconsistent “current”
+version-to-code-name examples.
+
+The installation walkthrough explicitly targets experimentation, not a hardened
+internet-facing production service. As an agent security recommendation, do not
+promote its TLS-verification bypass examples to production defaults. Use trusted
+certificates and protect credentials. Before any real upgrade, back up, test
+elsewhere, and read the complete APT transaction.
 
 ## Diagnose by phase
 

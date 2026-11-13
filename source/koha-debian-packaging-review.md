@@ -13,14 +13,24 @@ domains: [koha, debian, packaging, code-review, qa]
 related: [koha-debian-package-build, koha-code-review, koha-data-review, koha-skill-maintenance]
 ---
 
-> **Packaging snapshot:** Refreshed `2026-07-18T10:23:10Z` from supplied Koha
-> Debian build, installation, and package-command guidance. At the start of every
+> **Packaging snapshot:** Refreshed `2026-11-13T18:47:32Z` from Koha wiki Debian
+> build, dependency, installation, package-command, and script guidance. At the start of every
 > review, compare this timestamp with the current date. If it is more than 90 days
 > old, warn that package infrastructure may have changed, ask for refreshed material,
 > and continue with the stale snapshot only if the user accepts that limitation.
 >
 > **Main-tree cross-check:** Packaging integration points were checked against Koha
 > main at commit `1265f905234946d67f7112932f9b274c47faf152` (2026-07-17).
+>
+> **General guideline snapshot:** Reviewed `2026-11-13T18:54:37Z` from a
+> user-supplied Koha wiki export identifying revision `40849` (last edited
+> 2026-10-14). No current Koha checkout was provided, so the main-tree cross-check
+> was not renewed.
+
+Check the general-guideline baseline and main-tree date independently of this wiki
+refresh. If either relevant baseline is more than 90 days old, warn, ask for refreshed
+material or a current checkout, and continue on that baseline only with the user's
+explicit acceptance. A recent supplemental refresh does not make those records current.
 
 Apply `koha-code-review` to packaged source and scripts. The coding guidelines are
 authoritative. Packaging/installation guidance and current main are additive: they
@@ -42,7 +52,7 @@ Debian suites, architectures, existing instances, and new installations. Package
 review is lifecycle review; a script that works after a fresh install can still break
 an upgrade or purge.
 
-## Current main integration model
+## Main integration model from the historical cross-check
 
 At the recorded main revision:
 
@@ -81,13 +91,23 @@ A packaging change is incomplete when only one projection is updated.
 - Generated files are regenerated, not hand-edited as the sole change.
 
 Search all packaging manifests rather than assuming `koha-common` is the only owner;
-main currently duplicates many command/template entries for `koha-core`.
+the historical main cross-check found many command/template entries duplicated for
+`koha-core`. Confirm ownership in the target revision.
 
 ## Dependencies
 
 - Establish why the dependency is build-time, runtime, optional, alternative, or
   suite-specific. Do not add a heavy service dependency when a Suggests/Recommends or
   experimental/full package boundary is intended.
+- Check redistribution licensing, the minimum working version, transitive dependency
+  cost, and packaging feasibility. Coordinate with the Packaging Manager/team early.
+  These enduring checks come from supplemental dependency guidance; its Wheezy/Jessie
+  support matrix and Alioth instructions are historical, not current prerequisites.
+- The release guidance assigns `cpanfile` changes and a justification to the author,
+  calls for a `dependency` keyword and packaging CC, and requires packaging sign-off
+  before progression. Report missing coordination; do not edit tracker fields or add
+  a sign-off without authorization. Resolve any generator/ownership ambiguity in the
+  target branch rather than copying the release page's unfinished automation notes.
 - Verify the Debian package exists with a compatible version in every supported
   target suite. Perl module presence in `cpanfile` does not prove Debian package
   availability or naming.
@@ -114,7 +134,9 @@ failed/partial configure, abort paths, remove, purge, and reinstall.
 - Never assume one instance. Use the shared list/foreach helpers safely and handle no
   instances, disabled instances, unusual valid names, and partial instances.
 - Database migration is backed up/tested and cannot be “rolled back” merely by
-  downgrading the package.
+  downgrading the package. Backup/restore coverage includes uploaded files and other
+  instance state, not only SQL; the wiki warns that uploads are omitted from
+  `koha-dump` unless explicitly requested. Confirm the installed command's behavior.
 - User/group, directory, permissions, symlink, Apache, systemd/init, cron, logrotate,
   and service operations have safe upgrade transitions.
 - Starting/restarting services during package configuration is deliberate and
@@ -170,7 +192,11 @@ Cover:
 
 A moving APT suite can cause automatic major upgrades; supplied operational guidance
 recommends version-specific suites. Packaging changes should not assume every operator
-tracks the same suite style.
+tracks the same suite style. The refreshed installation page mixes incompatible
+“current” version/code-name mappings; do not reproduce them as a support matrix.
+Verify the selected repository candidate. Its deb822 `.sources`/`Signed-By` examples
+also require checking for duplicate legacy `.list` entries when migrating settings.
+The page explicitly describes a test installation, not production hardening.
 
 ## Tests and static checks
 
