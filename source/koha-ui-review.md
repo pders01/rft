@@ -13,8 +13,8 @@ domains: [koha, ui, templates, accessibility, translation, code-review, qa]
 related: [koha-code-review, koha-data-review, koha-plugin-development, koha-skill-maintenance]
 ---
 
-> **Guideline snapshot:** Refreshed `2026-07-18T10:07:31Z` from supplied Koha
-> interface-pattern and coding guidance. At the start of every review, compare this
+> **Supplemental snapshot:** Refreshed `2026-11-13T18:47:32Z` from the Koha wiki
+> interface-pattern guidance. At the start of every review, compare this
 > timestamp with the current date. If it is more than 90 days old, warn that the
 > skill may not reflect current community practice and ask for refreshed source
 > material. Continue only if the user accepts that limitation.
@@ -22,6 +22,16 @@ related: [koha-code-review, koha-data-review, koha-plugin-development, koha-skil
 > **Main-tree cross-check:** UI integration points were checked against Koha main at
 > commit `1265f905234946d67f7112932f9b274c47faf152` (2026-07-17). Main-tree
 > conventions are additive evidence, not authority over the coding guidelines.
+>
+> **General guideline snapshot:** Reviewed `2026-11-13T18:54:37Z` from a
+> user-supplied Koha wiki export identifying revision `40849` (last edited
+> 2026-10-14). No current Koha checkout was provided, so the main-tree cross-check
+> was not renewed.
+
+Check the general-guideline baseline and main-tree date independently of this wiki
+refresh. If either relevant baseline is more than 90 days old, warn, ask for refreshed
+material or a current checkout, and continue on that baseline only with the user's
+explicit acceptance. A recent supplemental refresh does not make those records current.
 
 Apply this alongside `koha-code-review`. The coding guidelines are authoritative;
 the interface-pattern material and current main show established user experience and
@@ -40,6 +50,12 @@ list/view → create/edit/action → validation/error → success/cancel → res
 
 Review every state, not just the template shown in the diff. Verify controller data,
 server-side authorization, API calls, empty states, and JavaScript-enhanced behavior.
+
+The refreshed interface guidance mixes Bootstrap generations and legacy examples:
+its breadcrumb/modal sections reference Bootstrap 5, while other links, tab output,
+and button examples retain older conventions. Some sample forms omit modern CSRF
+and operation handling. Treat those as examples of interaction flow, not copy-ready
+markup; use the target checkout and authoritative coding rules to resolve details.
 
 ## Page structure and orientation
 
@@ -64,8 +80,10 @@ server-side authorization, API calls, empty states, and JavaScript-enhanced beha
 ## Messages, errors, and workflow state
 
 - Informational, success, warning, and error presentation matches the semantic state,
-  not merely a desired color. Non-blocking information does not masquerade as a
-  failure; a blocked/destructive decision is visually and textually clear.
+  not merely a desired color. The interface guidance uses `alert alert-info` for
+  non-blocking information and `alert alert-warning` for a blocked action or required
+  decision; verify target-version components rather than inventing variants from
+  color alone. A blocked/destructive decision is visually and textually clear.
 - Messages explain what happened and what the user can do next without exposing
   internals. Check logs separately for developer detail.
 - Validation errors are associated with their fields, understandable without color,
@@ -106,8 +124,10 @@ it. Group views with navigation and actions in toolbars or row-action controls.
 - Use appropriate native input semantics, except follow the coding guideline to
   avoid `type="number"` in favor of text plus `inputmode="numeric"` and an optional
   integer pattern.
-- Password controls set the required autocomplete mode. Do not disable useful
-  autocomplete indiscriminately.
+- Follow HTML10's stated policy: authentication password fields use
+  `autocomplete="off"`; new/confirmation fields may use `new-password`. Identify
+  this as Koha policy, not a guarantee that browsers prevent saved credentials.
+  Do not expand the rule into disabling autocomplete on unrelated fields.
 - Every state-changing form includes `csrf-token.inc`, uses a stateful method, and
   carries an `op` beginning `cud-`. GET forms remain stateless.
 - Server-side code repeats validation and authorization; client-side validation is
@@ -118,6 +138,9 @@ it. Group views with navigation and actions in toolbars or row-action controls.
 ## Translation, terminology, and output safety
 
 - UI strings live in templates or translation-aware JavaScript, not Perl controllers.
+- HTML1 forbids `>` comparisons inside HTML tags, not every TT conditional
+  attribute. Preserve balanced tags (`HTML11`) and Koha's XHTML-style tag closing.
+  For a hash key colliding with a TT virtual method, use `item('key')` (`HTML6`).
 - Use sentence case, canonical library terminology, inclusive language, and
   gender-neutral phrasing.
 - Keep text separate from markup. Wrap text as required by current translation
@@ -154,22 +177,38 @@ it. Group views with navigation and actions in toolbars or row-action controls.
   mechanism. Keep TT-derived setup data in its own script block and ordinary tidy
   JavaScript free of TT expressions, following the coding guideline's separation
   pattern.
-- Use current `Koha.addPrefs`/`Koha.addPermissions` integration where applicable
-  rather than inventing globals.
+- Use `Koha.addPrefs`/`Koha.addPermissions` as described by JS19 where the target
+  version supports them, rather than inventing globals. Keep the setup block and
+  ordinary JS separate; JS1's nonce requirement still applies even if a sample
+  second script omits it.
+- Use vanilla JavaScript or Vue for new/refactored core code (`JS21`); retained
+  jQuery support for *UserJS and plugins does not justify new core jQuery code.
+  Do not rewrite untouched legacy code merely to remove jQuery.
+- JS7's older jQuery-ready examples and JS10's jQuery-validation requirement coexist
+  with JS21 in the snapshot. Preserve HTML `required` and the existing validation
+  contract; surface a new/refactored form's unresolved validation choice to QA
+  rather than silently declaring either rule repealed.
 - Bind events in JavaScript, never inline attributes. New linked user strings use
   Koha's JS i18n functions; embedded strings use the template-supported form.
+- Select/match using stable data attributes, IDs, or appropriate classes, never
+  translated visible GUI text (`JS20`). Test the behavior in another language.
+- For link-triggered form submission, use JS16's `form-submit.js` mechanism; verify
+  that the target version includes it globally or explicitly load it for older
+  backports. POST submission includes CSRF; do not use GET for a mutation.
 - Use the current API client for resource fetching where supported, and handle
   failure visibly rather than only logging it.
 - Avoid page-specific CSS when existing Bootstrap/Koha utility and component classes
   express the design. Check staff and OPAC themes, narrow viewports, zoom, and high
   contrast.
 - New JavaScript is Prettier-formatted, passes project lint/tidy checks, and includes
-  required JSDoc.
+  required JSDoc. JS17's double-quote rule is **draft**, independently of actual
+  formatter requirements. JS6's trailing-comma restriction still has a legacy IE
+  rationale; flag a conflict with target tooling rather than silently removing it.
 
 ## Verification
 
-Run the narrow controller/unit test and relevant author tests. Current main includes
-checks for template validity/tidiness, TT/JavaScript formatting, YAML, licensing, and
+Run the narrow controller/unit test and relevant author tests. The historical main
+cross-check found checks for template validity/tidiness, TT/JavaScript formatting, YAML, licensing, and
 missing CSRF tokens; discover exact commands in the checkout. Then manually verify:
 
 - keyboard-only use and visible focus;

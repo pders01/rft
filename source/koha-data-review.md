@@ -13,8 +13,8 @@ domains: [koha, database, dbic, system-preferences, code-review, qa]
 related: [koha-code-review, koha-api-review, koha-ui-review, koha-plugin-development, koha-skill-maintenance]
 ---
 
-> **Guideline snapshot:** Refreshed `2026-07-18T10:07:31Z` from supplied Koha
-> database-update, system-preference, object-model, testing, and coding guidance.
+> **Supplemental snapshot:** Refreshed `2026-11-13T18:47:32Z` from the Koha wiki
+> database-update, system-preference, object-model, and testing guidance.
 > At the start of every review, compare this timestamp with the current date. If it
 > is more than 90 days old, warn that the skill may not reflect current community
 > practice and ask for refreshed source material. Continue only if the user accepts
@@ -23,6 +23,16 @@ related: [koha-code-review, koha-api-review, koha-ui-review, koha-plugin-develop
 > **Main-tree cross-check:** Data integration points were checked against Koha main
 > at commit `1265f905234946d67f7112932f9b274c47faf152` (2026-07-17). Main-tree
 > conventions are additive evidence, not authority over the coding guidelines.
+>
+> **General guideline snapshot:** Reviewed `2026-11-13T18:54:37Z` from a
+> user-supplied Koha wiki export identifying revision `40849` (last edited
+> 2026-10-14). No current Koha checkout was provided, so the main-tree cross-check
+> was not renewed.
+
+Check the general-guideline baseline and main-tree date independently of this wiki
+refresh. If either relevant baseline is more than 90 days old, warn, ask for refreshed
+material or a current checkout, and continue on that baseline only with the user's
+explicit acceptance. A recent supplemental refresh does not make those records current.
 
 Apply this alongside `koha-code-review`. The coding guidelines are authoritative.
 The supplemental how-to material and patterns observed in Koha main are additive:
@@ -53,10 +63,11 @@ For structural changes, verify:
   installations. Contributors add atomic updates; release managers later move them
   into release revision storage and assign versions.
 - Column order remains aligned, using `AFTER`/`BEFORE` where the project requires it.
-- The update follows the atomic-update skeleton currently present in main, records
+- The update follows the atomic-update skeleton in the target checkout, records
   the bug number and one-line description, accepts the installer-provided `dbh` and
-  `out` arguments, and reports meaningful output through that handle. Main currently
-  provides `say_success`, `say_warning`, and `say_info` for semantic output.
+  `out` arguments, and reports meaningful output through that handle. The wiki and
+  historical main cross-check identify `say_success`, `say_warning`, and `say_info`
+  as installer output helpers; confirm availability in the target revision.
 - The update is idempotent: rerunning it causes no damage, duplicate data, errors, or
   misleading warnings. Use the checkout's existence helpers for tables, columns,
   primary/unique/foreign keys, and indexes where appropriate. `INSERT IGNORE` can be
@@ -70,9 +81,11 @@ For structural changes, verify:
   the required DBIC boolean annotation.
 - Changes to constrained column types or nullability safely remove and restore every
   affected foreign key.
-- User-derived SQL values use placeholders. Review SQL capitalization, integer/date
-  defaults, identifiers, and explicit `IN`/subquery behavior against the adopted
-  coding guidelines rather than legacy examples.
+- User-derived SQL values use placeholders (`SQL10: Placeholders`). Review SQL
+  capitalization, integer/date defaults, identifiers, ANSI_QUOTES compatibility, and
+  SQL9's specific clause layout against the authoritative guidelines, not old
+  examples. The separate **SQL10: Prefer IN over OR chains** is explicitly
+  **proposed**; do not present its IN/subquery preference as an adopted requirement.
 - Mirrored/history tables are kept compatible—for example active, deleted, and
   modification tables representing the same entity.
 - Added installer sample data is reflected in translated installer data where
@@ -80,18 +93,22 @@ For structural changes, verify:
 - Contributors do not edit the application version or add release-manager revision
   files.
 
-If DBIx::Class files need regeneration, main currently provides
-`misc/devel/update_dbix_class_files.pl`; confirm its local options before running it.
+The database-update guidance identifies `misc/devel/update_dbix_class_files.pl`
+for DBIC regeneration; confirm its target-version options before running it. The
+KTD `dbic` helper may recreate a database: inspect its implementation and use an
+isolated environment rather than treating regeneration as inherently read-only.
 Generated content above the “DO NOT MODIFY” boundary is not manually edited.
-Contributor-supplied generated changes should be isolated as requested by current
-release practice; hand-written supplements belong below that boundary.
+The wiki assigns regeneration to the RM; contributor-supplied generated changes go
+in a separate patch marked `[DO NOT PUSH]` so they can be regenerated. Confirm the
+target release practice before submission; hand-written supplements belong below
+the generated boundary.
 
 Treat the coding guideline's atomic-update SQL exception according to its marked
 status and report that status rather than silently resolving a policy ambiguity.
 
 ## System preferences
 
-Main currently places English preference YAML under the staff administration
+The wiki and historical main cross-check place English preference YAML under the staff administration
 preference hierarchy, mandatory defaults in the installer syspref data, and
 contributor revisions in the atomic-update directory. Use the actual neighboring
 files at review time because groups and paths can move.
@@ -134,16 +151,21 @@ rows.
 - Prefer existing `Koha::Object(s)` classes for table CRUD. New singular and plural
   classes expose the correct DBIC result type and object class using conventions
   found in the current checkout.
-- New table and key names follow the adopted database guideline, not historical
-  examples that use a generic `id` or backticks.
+- New table and key names follow the authoritative database guideline, not the
+  object tutorial's historical generic `id` rule or backtick examples. A recent
+  retrieval date does not make an unchanged old example a newly adopted rule.
 - Methods and variables are `snake_case`. Methods accept a single object, ID,
   arrayref, or named hashref as appropriate; pass an already-loaded related object
   when that avoids a redundant fetch.
 - Relationship accessors delegate to the DBIC relationship and wrap the result so
   prefetch, embeds, sorting, and counts remain possible. Do not replace a relationship
   with a new query by foreign key.
-- DBIC relationship names and Koha accessors align. Hand-written aliases or filtered
-  relationships stay below the generated boundary and preserve SQL-level prefetch.
+- Every accessor returning a related resultset has a same-named DBIC relationship
+  (`PERL15.1.2`). Hand-written aliases stay below the generated boundary; do not
+  rename away the generated relationship. Filtered relationships use a DBIC coderef
+  condition and the Koha method delegates to it (`PERL15.1.3`) so the filter remains
+  usable for prefetch, embeds, sorting, and `+count`. Force resultset rather than
+  list context where needed. Test SQL-level counts/sorting, not only display embeds.
 - Use current constructors such as `_new_from_dbic` where established by the
   checkout; do not copy obsolete constructor names from examples.
 - Domain failures use current `Koha::Exceptions`, not historical `carp`, `warn`, or
@@ -151,8 +173,14 @@ rows.
 - If DB-generated values are needed immediately after `store`, verify whether the
   object must refresh/discard changes, and test the actual behavior rather than
   relying on an old caveat.
-- Review searches for query growth and N+1 behavior. Use explicit `-in` for external
-  lists and database subqueries for key sets already represented by a result set.
+- Review searches for query growth and N+1 behavior. The proposed IN guideline
+  recommends explicit `-in`/`-not_in` for external lists and database subqueries for
+  key sets already represented by a result set. Label that status; prove a concrete
+  performance problem separately if reporting it as a blocker.
+- New mutable objects should have action logs for supported add/modify/delete/merge
+  operations (`ACTN2`). Data-change logs use ACTN1's JSON diff with original and
+  modified values. Trace logging through object methods and callers and verify
+  appropriate log content and configured on/off behavior without exposing secrets.
 
 ## Tests and destructive-check safety
 

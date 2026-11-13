@@ -13,9 +13,9 @@ domains: [koha, api, rest, code-review, qa]
 related: [koha-code-review, koha-data-review, koha-plugin-development, koha-skill-maintenance]
 ---
 
-> **Guideline snapshot:** Refreshed `2026-07-18T10:07:31Z` from the supplied
-> Koha REST API coding guidelines. At the start of every review, compare this
-> timestamp with the current date. If it is more than 90 days old, warn that the
+> **API guideline snapshot:** Refreshed `2026-11-13T18:47:32Z` from the Koha wiki
+> REST API coding guidelines and endpoint how-to. At the start of every review,
+> compare this timestamp with the current date. If it is more than 90 days old, warn that the
 > skill may not reflect current community guidelines and ask for refreshed source
 > material. Continue only if the user accepts that limitation; never silently treat
 > an old snapshot as current.
@@ -23,6 +23,16 @@ related: [koha-code-review, koha-data-review, koha-plugin-development, koha-skil
 > **Main-tree cross-check:** API integration points were checked against Koha main at
 > commit `1265f905234946d67f7112932f9b274c47faf152` (2026-07-17). Main-tree
 > conventions are additive evidence, not authority over the coding guidelines.
+>
+> **General guideline snapshot:** Reviewed `2026-11-13T18:54:37Z` from a
+> user-supplied Koha wiki export identifying revision `40849` (last edited
+> 2026-10-14). No current Koha checkout was provided, so the main-tree cross-check
+> was not renewed.
+
+Check the general-guideline baseline and main-tree date independently of this wiki
+refresh. If either relevant baseline is more than 90 days old, warn, ask for refreshed
+material or a current checkout, and continue on that baseline only with the user's
+explicit acceptance. A recent supplemental refresh does not make those records current.
 
 The API and general coding guidelines are authoritative. Use main to confirm current
 paths, helpers, and tests, but do not let existing legacy endpoints weaken a rule.
@@ -66,21 +76,22 @@ any two layers even when each file looks reasonable in isolation.
 - Related keys use `<relation>_id`; embedding replaces the key with the relation name
   (for example `patron_id` becomes `patron`).
 
-## Current main integration points
+## Main integration points from the historical cross-check
 
 At the recorded main-tree cross-check, API controllers live under `Koha/REST/V1`,
 resource and path fragments are YAML under `api/v1/swagger`, and the root
 `swagger.yaml` registers both. The bundled JSON is generated output. Confirm these
 locations in the reviewed checkout rather than applying them blindly.
 
-After changing a definition or path, run the checkout's API bundle command. Main
-currently exposes `yarn api:bundle`, backed by Redocly, and writes the generated
-bundle. Review generated drift but do not hand-edit the bundle. Controller tests are
-currently organized under `t/db_dependent/api/v1` and use `Test::Mojo`, transactions,
+After changing a definition or path, run the checkout's API bundle command. The
+wiki how-to names `yarn api:bundle`; the historical main cross-check found it backed
+by Redocly. Confirm the command and generated output in the target revision. Review
+generated drift but do not hand-edit the bundle. At that revision, controller tests
+were organized under `t/db_dependent/api/v1` and used `Test::Mojo`, transactions,
 TestBuilder objects, and explicit authorization cases.
 
-The guideline names `Koha::REST::V1::Cities` as its controller reference. Current
-main still demonstrates `valid_input`, `try`/`catch`, object rendering, Location on
+The guideline names `Koha::REST::V1::Cities` as its controller reference. The
+historically checked controller demonstrates `valid_input`, `try`/`catch`, object rendering, Location on
 create, resource-not-found handling, and the deleted-response helper. Copy the
 pattern critically: an existing typo, omission, or grandfathered construct is not a
 new standard.
@@ -105,8 +116,8 @@ A duplicate create returning 409 and a deletion blocked by conflict returning 40
 are marked **draft** in the supplied guidelines; recommend them with that status,
 not as unqualified adopted blockers.
 
-For asynchronous POST operations, 202 is required because the target resource does
-not yet exist. Its response schema references the shared job definition, the body is
+For POST operations whose primary outcome is an enqueued background job rather
+than an immediately created target resource, `REST3.2.1.2` requires 202. Its response schema references the shared job definition, the body is
 the job representation, and Location identifies the job tracking endpoint—not the
 future resource.
 
@@ -140,12 +151,19 @@ its status in findings:
   without authorization.
 - Ensure writes cannot occur through GET and all input reaches the controller via
   validated OpenAPI input.
+- Inspect actual authentication and CSRF middleware/tests for the target version,
+  including session-authenticated requests where applicable. SEC1's supplied general
+  guideline still labels REST protection work in progress; that is neither proof of
+  a current vulnerability nor permission to waive the target contract.
 - Check query operators, pagination, ordering, embeds, and field selection against
   the capabilities declared by the route.
 - Ensure exceptions and validation responses do not leak internals or sensitive
   patron data.
 - Check create/update/delete atomicity and conflicts, especially around foreign keys
   and concurrent updates.
+- When a new mutable business object is introduced, check action logging (`ACTN2`)
+  through API and other callers. Preserve ACTN1's original/modified JSON-diff data
+  and test the actual side effect, not only the response.
 
 ## Tests
 

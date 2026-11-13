@@ -13,9 +13,9 @@ domains: [koha, code-review, qa]
 related: [koha-api-review, koha-data-review, koha-ui-review, koha-plugin-development, koha-debian-packaging-review, koha-contribution-workflow, koha-skill-maintenance]
 ---
 
-> **Guideline snapshot:** Refreshed `2026-07-18T10:07:31Z` from the supplied
-> general Koha coding guidelines. At the start of every review, compare this
-> timestamp with the current date. If it is more than 90 days old, warn that the
+> **Guideline snapshot:** Refreshed `2026-11-13T18:54:37Z` from a user-supplied
+> Koha coding-guideline export identifying wiki revision `40849` (last edited
+> 2026-10-14). At the start of every review, compare this timestamp with the current date. If it is more than 90 days old, warn that the
 > skill may not reflect current community guidelines and ask for refreshed source
 > material. Continue only if the user accepts that limitation; never silently treat
 > an old snapshot as current.
@@ -23,6 +23,13 @@ related: [koha-api-review, koha-data-review, koha-ui-review, koha-plugin-develop
 > **Main-tree cross-check:** Integration points were checked against Koha main at
 > commit `1265f905234946d67f7112932f9b274c47faf152` (2026-07-17). Main-tree
 > conventions are additive evidence, not authority over the coding guidelines.
+>
+> **Supplemental refresh:** Commit-message, unit-test, and QA guidance was reviewed
+> from the Koha wiki at `2026-11-13T18:47:32Z`. Check that date and the main-tree
+> date independently of the guideline refresh. If either is more than 90 days old,
+> warn, ask for refreshed material or a current checkout, and continue on historical
+> evidence only with the user's explicit acceptance. No current checkout was supplied;
+> the main-tree hash/date were not renewed.
 
 The coding guidelines are authoritative. Use current main to locate integration
 points, tests, helpers, and representative implementations, but do not infer that a
@@ -32,7 +39,9 @@ existing code and review newly introduced behavior against the guidelines.
 Review the proposed Koha change, not the entire surrounding codebase. Apply the
 coding guidelines to lines and behavior introduced or changed by the patch.
 Existing violations are not blockers unless the patch worsens or depends on them.
-Recommend unrelated cleanup as a separate patch, never mixed into the bug fix.
+A patch submitted before a new rule may receive a grandfather exception at the QA
+reviewer's discretion; do not self-grant it or use legacy main code to excuse new
+violations. Recommend unrelated cleanup as a separate patch, never mixed into a fix.
 Treat rules explicitly marked **draft**, **proposed**, **revised title**, or
 **deprecated** according to that status; do not present a proposal as an adopted
 requirement.
@@ -67,8 +76,8 @@ Review every commit independently, not only the aggregate diff:
 - The subject starts `Bug <number>: `, followed by a clear summary. The community
   guidance recommends fewer than 50 characters where practical; do not turn that
   recommendation into an absolute failure.
-- Follow-ups identify themselves immediately after the colon using the established
-  wording. QA follow-ups identify the QA role.
+- Follow-ups use `(follow-up)` immediately after the colon. QA team follow-ups use
+  `(QA follow-up)`. Do not substitute bracketed or differently spelled variants.
 - The body explains the problem and the chosen change, wrapping ordinary prose near
   72 characters where practical.
 - A usable `Test plan:` can be followed by a Koha-familiar tester who does not know
@@ -81,7 +90,10 @@ Review every commit independently, not only the aggregate diff:
   A sign-off includes `Signed-off-by:` and a brief account of what was tested.
 - Material AI/LLM assistance uses
   `Assisted-by: <ModelName> <Version> (<Vendor>)`; routine completion, linting, and
-  static analysis do not require it. A human remains responsible for verification.
+  static analysis do not require it. A human author must personally review, verify,
+  and approve every commit before submission. For orchestrated assistance, the
+  guideline requires only the orchestrator's model/version in the trailer. A short
+  explanation of substantial AI use and human review is encouraged, not mandatory.
 
 Do not amend commits, add sign-offs, upload patches, or change tracker status unless
 explicitly asked. Reviewing readiness is not authorization to perform workflow
@@ -91,11 +103,13 @@ transitions.
 
 - Every commit references `Bug <number>` at the beginning of its message.
 - New scripts and modules carry the GPLv3+ licence statement.
-- Text files use four spaces, not tabs. Large reindentation or stylistic refactoring
-  unrelated to the functional change belongs in a separate commit.
+- Text files use four spaces, not tabs, under the general indentation rule; SQL9
+  separately specifies two-space SQL clause indentation. Do not silently apply the
+  general rule over that specific layout. Large unrelated reindentation or stylistic
+  refactoring belongs in a separate commit.
 - New terminology is consistent internally and in the UI. Use sentence case,
   gender-neutral pronouns, and inclusive language.
-- New cookies or changed cookie behavior update the cookie documentation.
+- Added, removed, or changed cookies update the cookie documentation (`DOC1`).
 - Performance or cache claims include before/after benchmarks.
 
 ## Perl and Koha architecture
@@ -114,7 +128,8 @@ For changed Perl, check:
 - New methods/functions take one database ID, arrayref, or hashref of named
   arguments rather than long positional lists. Avoid needless exports.
 - Use direct object notation (`CGI->new`), `constant` for read-only values, and
-  `Koha::Exceptions` rather than `die` or `croak` for domain failures.
+  `Koha::Exceptions` rather than `die` or `croak` for domain failures. Reuse existing
+  or generalized exceptions before adding new exception classes (`PERL26`).
 - Prefer `use` at the top of the file. `require` is reserved for runtime module
   names, unavoidable circular dependencies, or another QA-confirmed exception.
 - Global state in modules and CGI scripts is forbidden because it is not
@@ -132,7 +147,11 @@ For changed Perl, check:
 For `.tt`, `.inc`, HTML, notices, and UI strings, check:
 
 - Template Toolkit structure is syntactically valid and HTML tags are not opened in
-  mutually exclusive branches and closed only once outside them.
+  mutually exclusive branches and closed only once outside them (`HTML11`). HTML1
+  forbids `>` comparisons inside HTML tags because of translation parsing; it does
+  not ban every conditional attribute. Follow Koha's XHTML-style closing convention
+  even in HTML5 templates, and handle hash keys colliding with TT virtual methods
+  through `item('key')` (`HTML6`).
 - UI HTML and translatable interface strings are defined in templates rather than
   embedded in Perl controllers.
 - Dates use the `KohaDates` plugin and are supplied in ISO form.
@@ -141,8 +160,9 @@ For `.tt`, `.inc`, HTML, notices, and UI strings, check:
 - JavaScript and CSS links use the `Asset` plugin.
 - Every displayed template variable has an appropriate `html`, `uri`, `url`, or
   justified `$raw` filter. User-authored HTML is scrubbed before `$raw` rendering.
-- Authentication password fields use an appropriate `autocomplete` value;
-  new-password and confirmation fields use `new-password`.
+- HTML10 specifies `autocomplete="off"` for authentication password fields and
+  permits `new-password` for new/confirmation fields. Preserve that Koha policy
+  explicitly; do not claim it guarantees browser/password-manager behavior.
 - New or updated default notices use Template Toolkit.
 - Every OPAC page has exactly one `.maincontent` block.
 - Avoid `input type="number"`; use text with `inputmode="numeric"` and, when useful,
@@ -162,14 +182,25 @@ For `.tt`, `.inc`, HTML, notices, and UI strings, check:
   placeholders so translators can reorder them.
 - Attach events in JavaScript, not `onload`, `onclick`, or other HTML event
   attributes.
-- Forms use Koha's jQuery validation conventions and retain HTML `required` as a
-  non-JavaScript fallback.
-- Add no new jQueryUI dependencies.
+- Under JS21, new or refactored **core** code uses vanilla JavaScript or Vue wherever
+  possible. Do not add fresh jQuery code merely because neighboring code uses it;
+  retained support for *UserJS preferences and plugins is not a core-code exemption.
+- JS7's older jQuery-ready examples and JS10's jQuery-validation requirement remain
+  in the supplied snapshot alongside JS21. For forms, retain HTML `required` and
+  identify the conflict to QA if a new/refactored implementation needs a validation
+  choice. Do not silently repeal JS10 or rewrite unrelated legacy code.
+- Add no new jQueryUI dependencies (`JS11`).
 - New JS files are Prettier-formatted and document classes/functions with JSDoc,
   including parameter and return types.
 - Form-submission links use `form-submit.js` conventions where applicable.
 - Follow the established Vue resource save-navigation pattern when changing those
   resources.
+- Match stable IDs, data attributes, or appropriate classes, never translated GUI
+  strings (`JS20`). Include a non-English case when behavior depends on selectors.
+- JS17's double-quote preference is **draft**; distinguish it from actual formatter
+  failures. JS6 still disallows trailing commas using a legacy Internet Explorer
+  rationale. If that conflicts with the target formatter, report the conflict rather
+  than assuming the old rule was formally repealed.
 - Run the repository ESLint/Prettier checks applicable to the changed files.
 
 ## Database and SQL
@@ -178,11 +209,15 @@ For `.tt`, `.inc`, HTML, notices, and UI strings, check:
   named `<table>_id`.
 - Avoid SQL92 keywords for identifiers, MySQL backticks, zero-date defaults, and
   quotes around integer literals. SQL keywords are uppercase.
-- User-derived values always use placeholders.
-- Prefer explicit `-in`/`-not_in` for lists of external values in DBIC. If values
-  already come from a database result set and the column is a key, prefer a subquery
-  instead of materializing IDs into Perl. A bare arrayref produces OR conditions and
-  is appropriate only when OR is intentional.
+- User-derived values always use placeholders (`SQL10: Placeholders`). SQL3 calls
+  for ANSI_QUOTES mode; verify SQL compatibility in an isolated target environment,
+  not by changing a live database configuration during review.
+- The separate, duplicate-numbered **SQL10: Prefer IN over OR chains** is explicitly
+  **proposed**. It recommends explicit `-in`/`-not_in` for external lists and a
+  subquery for key sets already in the database rather than materializing IDs.
+  A bare arrayref is appropriate when OR is intentional. Label this proposal in
+  findings; a proven query-growth regression can be reported on its own evidence,
+  but the proposal alone is not an adopted-rule blocker.
 - Do not add SQL to CGI scripts. SQL belongs in the relevant module, except for
   accepted contexts such as reports and command-line special-purpose SQL. Atomic
   update guidance in the supplied guidelines is marked draft and should be reported
@@ -193,30 +228,40 @@ For `.tt`, `.inc`, HTML, notices, and UI strings, check:
 - When changing a constrained column's type or nullability, safely remove and restore
   its foreign-key constraints.
 - Date/action field naming follows `<action>_date`, with past-tense actions, while
-  noting that the database naming rule is draft.
+  noting that the database naming rule (`SQL14`) is **draft**.
 
 ## Security and state changes
 
 Treat these as high priority:
 
-- Stateful forms and requests (`POST`, `PUT`, `DELETE`, `PATCH`) carry a valid CSRF
-  token. POST forms include `csrf-token.inc` and an appropriate operation value.
-  Stateless methods must not use an `op` beginning with `cud-`.
+- Stateful CGI forms/requests (`POST`, `PUT`, `DELETE`, `PATCH`) carry a valid CSRF
+  token in `csrf_token` or `X-CSRF-TOKEN` (`SEC1`). POST forms include
+  `csrf-token.inc` and an `op` beginning `cud-`. Stateless methods must not use that
+  prefix. SEC1's exceptional large stateless POST discussion is **draft**.
+- The snapshot still calls REST CSRF coverage work in progress. Do not infer a
+  target-version protection gap or exemption from that historical note; inspect
+  actual authentication, middleware, and tests, and route to `koha-api-review`.
 - All untrusted template values are escaped. `$raw` is acceptable only with a clear
   trust argument or after the appropriate `C4::Scrubber`/`HtmlScrubber` profile.
 - Check authorization at the server-side action, not only by hiding UI controls.
 - Check for SQL injection, unsafe redirects, path traversal, leaked patron data,
   insecure direct object access, and state changes performed by GET.
-- If the change embeds AI functionality, it must be optional and off by default,
-  avoid data leakage, support multiple providers including self-hosting, and make
-  cost/performance implications clear.
+- If the change embeds AI functionality, it must have clear user benefit, remain
+  optional and off by default, avoid data leakage, and support configurable alternate
+  providers including self-hosting. Deploy limits on provider learning by default
+  where possible. Give comparative cost indications in the interface and performance
+  information where available; preserve human responsibility and privacy-law review.
 
 ## Action logs and deprecations
 
-- New action-log data changes use the standard JSON diff: preserve the original
-  object/data and pass both original and modified values to `logaction`.
+- New action-log data changes use the standard JSON diff (`ACTN1`): preserve the
+  original object/data and pass original and modified values to `logaction`.
+- New objects supporting add, modify, delete, or merge operations should have action
+  logs (`ACTN2`). Trace the operation, log module/action, affected object, and tests;
+  do not require unrelated legacy logging cleanup as part of a fix.
 - Do not add or enhance `/svc` endpoints; use the REST API.
-- New modules do not use C4. New indexing changes target DOM Zebra rather than GRS-1.
+- New modules go under `Koha::`, not C4. Do not add use of deprecated modules such as
+  `XML::Simple` (`DEPR4`). New indexing changes target DOM Zebra rather than GRS-1.
 - Staff/OPAC bibliographic display changes target XSLT, not deprecated non-XSLT
   templates.
 
@@ -227,7 +272,9 @@ Treat these as high priority:
   regressions, side effects, logs, and changed workflows.
 - Determine whether optional behavior should be controlled by configuration rather
   than imposed on every library.
-- Run the checkout's focused tests first. Database-dependent tests can modify the
+- Run the checkout's focused tests first. Do not infer that an entire `t` or `xt`
+  tree is safe to execute solely from a historical tutorial; inspect the selected
+  tests and environment. Database-dependent tests can modify the
   configured database; run them only in an isolated development environment and use
   the test suite's transaction conventions.
 - Use TestBuilder-created records rather than optional sample data, but set values
